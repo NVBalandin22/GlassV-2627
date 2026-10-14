@@ -1,4 +1,5 @@
 ﻿using GlassV_2627.Data;
+using GlassV_2627.DTOs.StudentDTOs;
 using GlassV_2627.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,34 +19,65 @@ public class StudentsController : ControllerBase
     [HttpGet]
     public IActionResult GetAll()
     {
-        List<Student> students = _context.Students.ToList();
+        List<StudentResponseDTO> students = _context.Students
+            .Select(student => 
+                new StudentResponseDTO()
+                {
+                    Id = student.Id,
+                    Age = student.Age,
+                    Names = student.FirstName + " " + student.LastName,
+                }
+            ).ToList();
+        
         return Ok(students);
     }
 
     [HttpGet]
-    public IActionResult GetById([FromQuery] int id)
+    public IActionResult GetOne([FromQuery] int id)
     {
-        Student student = _context.Students.Where(x => x.Id == id).First();
+        StudentResponseDTO student = _context.Students
+            .Where(student => student.Id == id)
+            .Select(student =>
+                new StudentResponseDTO()
+                {
+                    Id = student.Id,
+                    Age = student.Age,
+                    Names = student.FirstName + " " + student.LastName
+                }
+            ).First();
+        
         return Ok(student);
     }
 
     [HttpPost]
-    public IActionResult Create([FromBody] Student student)
+    public IActionResult Create([FromBody] StudentEditDTO createStudent)
     {
-        _context.Students.Add(student);
+        Student entity = new Student();
+        
+        entity.FirstName = createStudent.FirstName;
+        entity.LastName = createStudent.LastName;
+        entity.Age = createStudent.Age;
+        entity.UserName = createStudent.UserName;
+        entity.Grade = 0;
+        entity.Password = "TempPassword";
+
+        _context.Students.Add(entity);
         _context.SaveChanges();
         
         return Ok();
     }
 
     [HttpPut]
-    public IActionResult Update([FromBody] Student student)
+    public IActionResult Update([FromBody] StudentEditDTO updateStudent)
     {
-        Student dbStudent = _context.Students.Where(x => x.Id == student.Id).First();
-
-        dbStudent.FirstName = student.FirstName;
-        dbStudent.LastName = student.LastName;
-        dbStudent.Age = student.Age;
+        Student entity = _context.Students
+            .Where(student => student.Id == updateStudent.Id)
+            .First();
+        
+        entity.FirstName = updateStudent.FirstName;
+        entity.LastName = updateStudent.LastName;
+        entity.Age = updateStudent.Age;
+        entity.UserName = updateStudent.UserName;
         
         _context.SaveChanges();
         
@@ -55,9 +87,24 @@ public class StudentsController : ControllerBase
     [HttpDelete]
     public IActionResult Delete([FromQuery] int id)
     {
-        Student studentToDelete = _context.Students.Where(x => x.Id == id).First();
-        _context.Students.Remove(studentToDelete);
+        Student entity = _context.Students
+            .Where(student => student.Id == id)
+            .First();
         
+        _context.Students.Remove(entity);
+        _context.SaveChanges();
+        
+        return Ok();
+    }
+
+    [HttpPatch]
+    public IActionResult UpdateGrade([FromBody] StudentUpdateGradeDTO updateStudent)
+    {
+        Student entity = _context.Students
+            .Where(student => student.Id == updateStudent.StudentId)
+            .First();
+
+        entity.Grade = updateStudent.NewGrade;
         _context.SaveChanges();
         
         return Ok();
