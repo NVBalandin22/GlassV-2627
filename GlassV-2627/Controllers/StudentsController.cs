@@ -1,7 +1,10 @@
 ﻿using GlassV_2627.Data;
 using GlassV_2627.DTOs.StudentDTOs;
 using GlassV_2627.Models;
+using GlassV_2627.Services;
+using GlassV_2627.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.FileProviders;
 
 namespace GlassV_2627.Controllers;
 
@@ -9,77 +12,56 @@ namespace GlassV_2627.Controllers;
 [Route("api/[controller]/[action]")]
 public class StudentsController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
-    
-    public StudentsController(ApplicationDbContext context)
+    private readonly IStudentService _service;
+
+    public StudentsController(IStudentService service)
     {
-        _context = context;
+        _service = service;
     }
 
     [HttpGet]
     public IActionResult GetAll()
     {
-        List<StudentResponseDTO> students = _context.Students
-            .Select(student => 
-                new StudentResponseDTO()
-                {
-                    Id = student.Id,
-                    Age = student.Age,
-                    Names = student.FirstName + " " + student.LastName,
-                }
-            ).ToList();
+        var result = _service.GetAll();
         
-        return Ok(students);
+        return Ok(result);
     }
 
     [HttpGet]
     public IActionResult GetOne([FromQuery] int id)
     {
-        StudentResponseDTO student = _context.Students
-            .Where(student => student.Id == id)
-            .Select(student =>
-                new StudentResponseDTO()
-                {
-                    Id = student.Id,
-                    Age = student.Age,
-                    Names = student.FirstName + " " + student.LastName
-                }
-            ).First();
+        var result = _service.GetOne(id);
+
+        if (result == null)
+        {
+            return NotFound();
+        }
         
-        return Ok(student);
+        return Ok(result);
     }
 
     [HttpPost]
     public IActionResult Create([FromBody] StudentEditDTO createStudent)
     {
-        Student entity = new Student();
-        
-        entity.FirstName = createStudent.FirstName;
-        entity.LastName = createStudent.LastName;
-        entity.Age = createStudent.Age;
-        entity.UserName = createStudent.UserName;
-        entity.Grade = 0;
-        entity.Password = "TempPassword";
+        var result = _service.Create(createStudent);
 
-        _context.Students.Add(entity);
-        _context.SaveChanges();
+        if (result == null)
+        {
+            return BadRequest();
+        }
         
-        return Ok();
+        return Created();
     }
 
     [HttpPut]
     public IActionResult Update([FromBody] StudentEditDTO updateStudent)
     {
-        Student entity = _context.Students
-            .Where(student => student.Id == updateStudent.Id)
-            .First();
-        
-        entity.FirstName = updateStudent.FirstName;
-        entity.LastName = updateStudent.LastName;
-        entity.Age = updateStudent.Age;
-        entity.UserName = updateStudent.UserName;
-        
-        _context.SaveChanges();
+        var result = _service.Update(updateStudent);
+
+        if (!result)
+        {
+            return BadRequest();
+        }
         
         return Ok();
     }
@@ -87,12 +69,12 @@ public class StudentsController : ControllerBase
     [HttpDelete]
     public IActionResult Delete([FromQuery] int id)
     {
-        Student entity = _context.Students
-            .Where(student => student.Id == id)
-            .First();
-        
-        _context.Students.Remove(entity);
-        _context.SaveChanges();
+        var result = _service.Delete(id);
+
+        if (!result)
+        {
+            return NotFound();
+        }
         
         return Ok();
     }
@@ -100,12 +82,12 @@ public class StudentsController : ControllerBase
     [HttpPatch]
     public IActionResult UpdateGrade([FromBody] StudentUpdateGradeDTO updateStudent)
     {
-        Student entity = _context.Students
-            .Where(student => student.Id == updateStudent.StudentId)
-            .First();
+        var result = _service.UpdateGrade(updateStudent);
 
-        entity.Grade = updateStudent.NewGrade;
-        _context.SaveChanges();
+        if (!result)
+        {
+            return BadRequest();
+        }
         
         return Ok();
     }

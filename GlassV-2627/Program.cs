@@ -1,4 +1,6 @@
 using GlassV_2627.Data;
+using GlassV_2627.Services;
+using GlassV_2627.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace GlassV_2627;
@@ -20,6 +22,9 @@ public class Program
         builder.Services.AddDbContext<ApplicationDbContext>(options => 
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
         );
+
+        builder.Services.AddScoped<IStudentService, StudentService>();
+        builder.Services.AddScoped<ITeacherService, TeacherService>();
 
         var app = builder.Build();
 
