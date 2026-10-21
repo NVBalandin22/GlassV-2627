@@ -1,5 +1,6 @@
 ﻿using GlassV_2627.Data;
 using GlassV_2627.DTOs.StudentDTOs;
+using GlassV_2627.Filters;
 using GlassV_2627.Models;
 using GlassV_2627.Services.Interfaces;
 
@@ -14,19 +15,39 @@ public class StudentService : IStudentService
         _context = context;
     }
     
-    public List<StudentResponseDTO> GetAll()
+    public List<StudentResponseDTO> GetAll(StudentFilterModel filters)
     {
-        List<StudentResponseDTO> students = _context.Students
-            .Select(student => 
-                new StudentResponseDTO()
-                {
-                    Id = student.Id,
-                    Age = student.Age,
-                    Names = student.FirstName + " " + student.LastName,
-                }
-            ).ToList();
+        IQueryable<Student> baseQuery = _context.Students;
+
+        if (filters.Grade.HasValue)
+        {
+            baseQuery = baseQuery.Where(student => student.Grade == filters.Grade.Value);
+        }
+        if (filters.Age.HasValue)
+        {
+            baseQuery = baseQuery.Where(student => student.Age == filters.Age.Value);
+        }
+        if (!string.IsNullOrEmpty(filters.FirstName))
+        {
+            // WHERE FIRSTNAME LIKE '%asdadasd%'
+            baseQuery = baseQuery.Where(student => student.FirstName.Contains(filters.FirstName));
+        }
+        if (!string.IsNullOrEmpty(filters.LastName))
+        {
+            baseQuery = baseQuery.Where(student => student.LastName.Contains(filters.LastName));
+        }
         
-        return students;
+        baseQuery = baseQuery.Skip((filters.Page - 1) * filters.PageSize).Take(filters.PageSize);
+
+        IQueryable<StudentResponseDTO> query = baseQuery.Select(x =>
+            new StudentResponseDTO()
+            {
+                Id = x.Id,
+                Names = x.FirstName + " " + x.LastName,
+                Age = x.Age
+            });
+        
+        return query.ToList();
     }
 
     public StudentResponseDTO? GetOne(int id)
