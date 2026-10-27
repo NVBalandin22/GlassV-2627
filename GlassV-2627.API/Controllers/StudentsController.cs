@@ -1,16 +1,13 @@
-﻿using GlassV_2627.Data;
-using GlassV_2627.DTOs.StudentDTOs;
+﻿using GlassV_2627.DTOs.StudentDTOs;
 using GlassV_2627.Filters;
-using GlassV_2627.Models;
-using GlassV_2627.Services;
 using GlassV_2627.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.FileProviders;
 
 namespace GlassV_2627.Controllers;
 
 [ApiController]
 [Route("api/[controller]/[action]")]
+
 public class StudentsController : ControllerBase
 {
     private readonly IStudentService _service;
