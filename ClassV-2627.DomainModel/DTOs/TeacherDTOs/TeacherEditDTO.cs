@@ -6,5 +6,5 @@ public class TeacherEditDTO
     public string Name { get; set; }
     public string Subject { get; set; }
     public string UserName { get; set; }
-    public int? Age { get; set; }
+    public int Age { get; set; }
 }

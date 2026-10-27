@@ -106,9 +106,8 @@ public class StudentService : IStudentService
         entity.Age = updateStudent.Age;
         entity.UserName = updateStudent.UserName;
         
-        bool result = _context.SaveChanges() == 1;
-        
-        return result;
+        _context.SaveChanges();
+        return true;
     }
 
     public bool Delete(int id)
@@ -123,9 +122,9 @@ public class StudentService : IStudentService
         }
         
         _context.Students.Remove(entity);
-        bool result = _context.SaveChanges() == 1;
+        _context.SaveChanges();
         
-        return result;
+        return true;
     }
 
     public bool UpdateGrade(StudentUpdateGradeDTO updateStudent)
