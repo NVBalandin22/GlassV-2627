@@ -75,6 +75,7 @@ public class StudentService : IStudentService
         entity.Age = createStudent.Age;
         entity.UserName = createStudent.UserName;
         entity.Grade = 0;
+        entity.TeacherId = createStudent.TeacherId;
         entity.Password = "TempPassword";
 
         try
@@ -103,11 +104,23 @@ public class StudentService : IStudentService
         
         entity.FirstName = updateStudent.FirstName;
         entity.LastName = updateStudent.LastName;
+        entity.TeacherId = updateStudent.TeacherId;
         entity.Age = updateStudent.Age;
         entity.UserName = updateStudent.UserName;
         
-        _context.SaveChanges();
-        return true;
+        
+        try
+        {
+            _context.Students.Update(entity);
+            _context.SaveChanges();
+            return true;
+            
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+        
     }
 
     public bool Delete(int id)
