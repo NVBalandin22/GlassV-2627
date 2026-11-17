@@ -17,40 +17,40 @@ public class TeachersController:ControllerBase
     }
 
     [HttpPost]
-    public IActionResult GetAll([FromBody] TeacherFilterModel filters)
+    public async Task<IActionResult> GetAll([FromBody] TeacherFilterModel filters)
     {
-        var result = _service.GetAll(filters);
+        var result = await _service.GetAll(filters);
         return Ok(result);
     }
 
     [HttpGet]
-    public IActionResult GetOne([FromQuery] int id)
+    public async Task<IActionResult> GetOne([FromQuery] int id)
     {
-        var result = _service.GetOne(id);
+        var result = await _service.GetOne(id);
         if(result == null) return NotFound();
         return Ok(result);
     }
 
     [HttpPost]
-    public IActionResult Create([FromBody] TeacherEditDTO teacher)
+    public async Task<IActionResult> Create([FromBody] TeacherEditDTO teacher)
     {
-        var result = _service.Create(teacher);
+        var result = await _service.Create(teacher);
         if (result == null) return BadRequest();
         return Created();
     }
 
     [HttpPut]
-    public IActionResult Update([FromBody] TeacherEditDTO teacher)
+    public  async Task<IActionResult> Update([FromBody] TeacherEditDTO teacher)
     {
-        var result = _service.Update(teacher);
+        var result = await _service.Update(teacher);
         if (!result) return BadRequest();
         return Ok();
     }
 
     [HttpDelete]
-    public IActionResult Delete([FromQuery] int id)
+    public  async Task<IActionResult> Delete([FromQuery] int id)
     {
-        var result = _service.Delete(id);
+        var result = await _service.Delete(id);
         if (!result) return NotFound();
         return Ok();
     }

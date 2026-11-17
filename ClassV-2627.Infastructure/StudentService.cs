@@ -3,7 +3,7 @@ using GlassV_2627.DTOs.StudentDTOs;
 using GlassV_2627.Filters;
 using GlassV_2627.Models;
 using GlassV_2627.Services.Interfaces;
-
+using Microsoft.EntityFrameworkCore;
 namespace GlassV_2627.Services;
 
 public class StudentService : IStudentService
@@ -15,7 +15,7 @@ public class StudentService : IStudentService
         _context = context;
     }
     
-    public List<StudentResponseDTO> GetAll(StudentFilterModel filters)
+    public async Task<List<StudentResponseDTO>> GetAll(StudentFilterModel filters)
     {
         IQueryable<Student> baseQuery = _context.Students;
 
@@ -47,12 +47,12 @@ public class StudentService : IStudentService
                 Age = x.Age
             });
         
-        return query.ToList();
+        return await query.ToListAsync();
     }
 
-    public StudentResponseDTO? GetOne(int id)
+    public async Task<StudentResponseDTO?> GetOne(int id)
     {
-        StudentResponseDTO? student = _context.Students
+        StudentResponseDTO? student = await _context.Students
             .Where(student => student.Id == id)
             .Select(student =>
                 new StudentResponseDTO()
@@ -61,12 +61,12 @@ public class StudentService : IStudentService
                     Age = student.Age,
                     Names = student.FirstName + " " + student.LastName
                 }
-            ).FirstOrDefault();
+            ).FirstOrDefaultAsync();
 
         return student;
     }
 
-    public int? Create(StudentEditDTO createStudent)
+    public async Task<int?> Create(StudentEditDTO createStudent)
     {
         Student entity = new Student();
         
@@ -81,7 +81,7 @@ public class StudentService : IStudentService
         try
         {
             _context.Students.Add(entity);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
         catch (Exception e)
         {
@@ -91,11 +91,11 @@ public class StudentService : IStudentService
         return entity.Id;
     }
 
-    public bool Update(StudentEditDTO updateStudent)
+    public async Task<bool> Update(StudentEditDTO updateStudent)
     {
-        Student? entity = _context.Students
+        Student? entity = await _context.Students
             .Where(student => student.Id == updateStudent.Id)
-            .FirstOrDefault();
+            .FirstOrDefaultAsync();
 
         if (entity == null)
         {
@@ -112,7 +112,7 @@ public class StudentService : IStudentService
         try
         {
             _context.Students.Update(entity);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return true;
             
         }
@@ -123,11 +123,11 @@ public class StudentService : IStudentService
         
     }
 
-    public bool Delete(int id)
+    public async Task<bool> Delete(int id)
     {
-        Student? entity = _context.Students
+        Student? entity = await _context.Students
             .Where(student => student.Id == id)
-            .FirstOrDefault();
+            .FirstOrDefaultAsync();
 
         if (entity == null)
         {
@@ -135,20 +135,20 @@ public class StudentService : IStudentService
         }
         
         _context.Students.Remove(entity);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
         
         return true;
     }
 
-    public bool UpdateGrade(StudentUpdateGradeDTO updateStudent)
+    public async Task<bool> UpdateGrade(StudentUpdateGradeDTO updateStudent)
     {
-        Student entity = _context.Students
+        Student entity = await _context.Students
             .Where(student => student.Id == updateStudent.StudentId)
-            .First();
+            .FirstAsync();
 
         entity.Grade = updateStudent.NewGrade;
         
-        bool result = _context.SaveChanges() == 1;
+        bool result = await _context.SaveChangesAsync() == 1;
         
         return result;
     }
